@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('secret_access_key')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from your GitHub repository
+                git branch: 'main', url: 'https://github.com/uncode1/Project_3.git'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                // Initialize Terraform with AWS credentials
+                sh 'AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY terraform init'
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                // Generate and display the execution plan for Terraform
+                sh 'AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY terraform plan -out=tfplan'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                // Apply the Terraform changes with manual approval
+                input message: "Do you want to apply Terraform changes?"
+                sh 'AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY terraform apply -auto-approve tfplan'
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                // Cleanup temporary files if needed (e.g., remove plan files)
+                sh 'rm -rf tfplan'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive important files like state files for tracking
+            archiveArtifacts artifacts: '**/*.tfstate', allowEmptyArchive: true
+        }
+
+        failure {
+            // Send email notification if the pipeline fails
+            mail to: 'petersumanu@yahoo.com',
+                 subject: "Pipeline Failed: AWS VPC Terraform Deployment",
+                 body: "The pipeline failed. Please check the details at: ${env.BUILD_URL}"
+        }
+    }
+}
