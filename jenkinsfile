@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout the code from your GitHub repository
-                git branch: 'main', url: 'https://github.com/uncode1/Project_3.git'
+                git branch: 'main', url: 'https://github.com/uncode1/project3b.git'
             }
         }
 
