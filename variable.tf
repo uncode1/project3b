@@ -19,7 +19,7 @@ variable "nat_gw" {
 }
 
 variable "instance_type" {
-  default = "t3.medium"
+  default = "t2.micro"
 }
 
 variable "ami" {
