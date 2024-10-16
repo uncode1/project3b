@@ -1,6 +1,7 @@
 pipeline {
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+        booleanParam(name: 'destroy', defaultValue: false, description: 'Run terraform destroy after deployment?')
     } 
     environment {
         AWS_ACCESS_KEY_ID     = credentials('group9_access_key_id')
@@ -62,6 +63,19 @@ pipeline {
                     // Store public IP in the environment if needed later in the pipeline
                     env.NGINX_SERVER_PUBLIC_IP = public_ip
                 }
+            }
+        }
+
+        stage('Destroy') {
+            when {
+                equals expected: true, actual: params.destroy
+            }
+            steps {
+                script {
+                    // Confirm before destroying
+                    input message: "Are you sure you want to destroy the infrastructure?", ok: "Yes, Destroy"
+                }
+                sh 'pwd; cd terraform; terraform destroy -auto-approve'
             }
         }
     }
