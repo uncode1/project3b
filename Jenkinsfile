@@ -8,6 +8,7 @@ pipeline {
     }
 
     agent any
+
     stages {
         stage('Checkout') {
             steps {
@@ -18,6 +19,7 @@ pipeline {
                 }
             }
         }
+
         stage('Plan') {
             steps {
                 sh 'pwd; cd terraform; terraform init'
@@ -25,6 +27,7 @@ pipeline {
                 sh 'pwd; cd terraform; terraform show -no-color tfplan > tfplan.txt'
             }
         }
+
         stage('Approval') {
             when {
                 not {
@@ -38,10 +41,34 @@ pipeline {
                 }
             }
         }
+
         stage('Apply') {
             steps {
                 sh 'pwd; cd terraform; terraform apply -input=false tfplan'
             }
+        }
+
+        stage('Get NGINX Server IP Address') {
+            steps {
+                script {
+                    // Fetch the NGINX public and private IP addresses from Terraform output
+                    def public_ip = sh(script: 'cd terraform && terraform output -raw nginx_server_public_ip', returnStdout: true).trim()
+                    def private_ip = sh(script: 'cd terraform && terraform output -raw nginx_server_private_ip', returnStdout: true).trim()
+
+                    // Print the IP addresses to Jenkins console output
+                    echo "NGINX Server Public IP: ${public_ip}"
+                    echo "NGINX Server Private IP: ${private_ip}"
+
+                    // Store public IP in the environment if needed later in the pipeline
+                    env.NGINX_SERVER_PUBLIC_IP = public_ip
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "Pipeline execution finished."
         }
     }
 }
