@@ -23,9 +23,13 @@ pipeline {
 
         stage('Plan') {
             steps {
-                sh 'pwd; cd terraform; terraform init'
-                sh 'pwd; cd terraform; terraform plan -out tfplan'
-                sh 'pwd; cd terraform; terraform show -no-color tfplan > tfplan.txt'
+                script {
+                    sh 'pwd; cd terraform; terraform init'
+                    def planOutput = sh(script: 'cd terraform; terraform plan -out tfplan', returnStdout: true)
+                    echo planOutput
+                    def showOutput = sh(script: 'cd terraform; terraform show -no-color tfplan', returnStdout: true)
+                    echo showOutput
+                }
             }
         }
 
@@ -45,7 +49,10 @@ pipeline {
 
         stage('Apply') {
             steps {
-                sh 'pwd; cd terraform; terraform apply -input=false tfplan'
+                script {
+                    def applyOutput = sh(script: 'cd terraform; terraform apply -input=false tfplan', returnStdout: true)
+                    echo applyOutput
+                }
             }
         }
 
@@ -75,7 +82,10 @@ pipeline {
                     // Confirm before destroying
                     input message: "Are you sure you want to destroy the infrastructure?", ok: "Yes, Destroy"
                 }
-                sh 'pwd; cd terraform; terraform destroy -auto-approve'
+                script {
+                    def destroyOutput = sh(script: 'cd terraform; terraform destroy -auto-approve', returnStdout: true)
+                    echo destroyOutput
+                }
             }
         }
     }
