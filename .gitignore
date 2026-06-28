@@ -1,0 +1,42 @@
+# OS
+.DS_Store
+
+# Python
+env/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+*.tmp
+*.bak
+Thumbs.db
+ehthumbs.db
+*.swp
+*.swo
+*.pyo
+*.pyd
+ENV/
+pip-wheel-metadata/
+*.egg-info/
+*.egg
+*.sublime-workspace
+*.sublime-project
+# Logs and temp
+*.cache
+*.aux
+*.out
+*.err
